@@ -1,6 +1,7 @@
 target
 *~
 .idea
+*.so
 *.iml
 .classpath
 .project
