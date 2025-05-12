@@ -14,7 +14,7 @@ DOCKER_RUN_OPTS=--rm
 MVN:=mvn
 CODESIGN:=docker run $(DOCKER_RUN_OPTS) -v $$PWD:/workdir gotson/rcodesign sign
 SRC:=src/main/java
-SQLITE_OUT:=$(TARGET)/$(sqlite)-$(OS_NAME)-$(OS_ARCH)
+SQLITE_OUT:=$(TARGET)/$(sqlite)
 SQLITE_OBJ?=$(SQLITE_OUT)/sqlite3.o
 SQLITE_ARCHIVE:=$(TARGET)/$(sqlite)-amal.zip
 SQLITE_UNPACKED:=$(TARGET)/sqlite-unpack.log
@@ -30,7 +30,8 @@ endif
 
 SQLITE_INCLUDE := $(shell dirname "$(SQLITE_HEADER)")
 
-CCFLAGS:= -I$(SQLITE_OUT) -I$(SQLITE_INCLUDE) $(CCFLAGS)
+GCOV_FLAGS ?=
+CCFLAGS:= -I$(SQLITE_OUT) -I$(SQLITE_INCLUDE) $(CCFLAGS) $(GCOV_FLAGS)
 
 $(SQLITE_ARCHIVE):
 	@mkdir -p $(@D)
@@ -40,6 +41,8 @@ $(SQLITE_ARCHIVE):
 		curl -L --max-redirs 0 -f -o$@ https://www.sqlite.org/2020/$(SQLITE_AMAL_PREFIX).zip || \
 		curl -L --max-redirs 0 -f -o$@ https://www.sqlite.org/$(SQLITE_AMAL_PREFIX).zip || \
 		curl -L --max-redirs 0 -f -o$@ https://www.sqlite.org/$(SQLITE_OLD_AMAL_PREFIX).zip; \
+	else \
+		echo "Skipping SQLite download (SQLITE_SOURCE=$(SQLITE_SOURCE))."; \
 	fi
 
 $(SQLITE_UNPACKED): $(SQLITE_ARCHIVE)
@@ -76,8 +79,6 @@ $(SQLITE_OUT)/sqlite3.o : $(SQLITE_UNPACKED)
 	    $(SQLITE_SOURCE)/sqlite3.c > $(SQLITE_OUT)/sqlite3.c.tmp
 # register compile option 'JDBC_EXTENSIONS'
 # limits defined here: https://www.sqlite.org/limits.html
-	cp $(SQLITE_SOURCE)/sqlite3.h $(SQLITE_OUT)/
-	cp $(SQLITE_SOURCE)/sqlite3ext.h $(SQLITE_OUT)/
 	perl -p -e "s/^(static const char \* const sqlite3azCompileOpt.+)$$/\1\n\n\/* This has been automatically added by sqlite-jdbc *\/\n  \"JDBC_EXTENSIONS\",/;" \
 	    $(SQLITE_OUT)/sqlite3.c.tmp > $(SQLITE_OUT)/sqlite3.c
 	cat src/main/ext/*.c >> $(SQLITE_OUT)/sqlite3.c
