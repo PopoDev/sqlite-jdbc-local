@@ -10,6 +10,7 @@ This is a fork from xerial/sqlite-jdbc.
 Build local version:
 ```bash
 make native SQLITE_SOURCE=/path/to/sqlite
+make native SQLITE_SOURCE=/path/to/sqlite GCOV_FLAGS="--coverage -O0 -g"
 ```
 
 Build jar:
