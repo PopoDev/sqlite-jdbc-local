@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.popodev.sqlite-jdbc-local</groupId>
     <artifactId>sqlite-jdbc-local</artifactId>
-    <version>3.40.0.0</version>
+    <version>3.39.4.0</version>
     <name>SQLite JDBC</name>
     <description>SQLite JDBC library</description>
     <url>https://github.com/PopoDev/sqlite-jdbc-local</url>
